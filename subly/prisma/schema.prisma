@@ -14,9 +14,33 @@ datasource db {
 }
 
 model User {
-  id        Int     @id @default(autoincrement())
-  name  String
-  surname  String
-  password  String
-  email     String  @unique
+  id              Int     @id @default(autoincrement())
+  name            String
+  surname         String
+  password        String
+  email           String  @unique
+  subscriptions   Subscription[]
 }
+
+model Category {
+  id            Int     @id @default(autoincrement())
+  Name          String
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id                      Int           @id @default(autoincrement())
+  title                   String
+  price                   Float
+  paymentFrequency        Int
+  paymentDate             DateTime 
+  receiveNotifications    Boolean     @default(true)
+  receiveFreqDemands      Boolean     @default(true)
+  paymentNotificationTime Int
+  userId                  Int
+  categoryId              Int      
+
+  user                    User        @relation(fields: [userId], references: [id])
+  category                Category    @relation(fields: [categoryId], references: [id])
+}
+
