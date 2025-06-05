@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {useAuth} from '@/context/authContext';
 
 export default function Login() {
-    const {fetchData} = useAuth();
+  const {fetchData} = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -55,7 +55,7 @@ export default function Login() {
   return (
     <div className="flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">Connexion</h2>
 
         {error && (
           <p className="text-red-500 text-center mb-4">{error}</p>
@@ -67,18 +67,18 @@ export default function Login() {
             <input
               type="email"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#97accf]"
-              placeholder="Enter your email"
+              placeholder="Entrez votre email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
             <input
               type="password"
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#97accf]"
-              placeholder="Enter your password"
+              placeholder="Entrez votre mot de passe"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -89,14 +89,14 @@ export default function Login() {
             className="w-full button"
             disabled={loading}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Connexion...' : 'Connecter'}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-4">
-          Don't have an account?{' '}
+          Pas de compte?{' '}
           <Link href="/register" className="text-[#3e4756] underline">
-            Sign up
+            Créer un compte
           </Link>
         </p>
       </div>
