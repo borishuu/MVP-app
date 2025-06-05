@@ -24,7 +24,7 @@ model User {
 
 model Category {
   id            Int     @id @default(autoincrement())
-  Name          String
+  name          String
   subscriptions Subscription[]
 }
 
