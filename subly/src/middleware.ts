@@ -50,6 +50,7 @@ export const config = {
   matcher: [
     '/login',
     '/register',
+    '/subscription/:path*',
     '/',
   ],
 };
