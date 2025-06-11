@@ -49,7 +49,14 @@ export default function SubscriptionPage() {
 
     const fetchAlternatives = async () => {
       try {
-          const response = await fetch(`/api/subscription/${id}/alternative`);
+          //const response = await fetch(`/api/subscription/${id}/alternative`);
+          const response = await fetch('/api/alternative', {
+            method: 'POST',
+            body: JSON.stringify({id: id}),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
           if (!response.ok) throw new Error('Failed to fetch alternatives');
           const data = await response.json();
           setAlternatives(data);

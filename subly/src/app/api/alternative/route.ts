@@ -49,7 +49,7 @@ Retourne la réponse au format JSON sous forme d'une liste d'objets avec les pro
     return response.text;
 }
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest) {
     try {
         const { userId, error } = await verifyAuth(request);
 
@@ -57,7 +57,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
             return NextResponse.json({ error }, { status: 401 });
         }
 
-        const subId = await parseInt(params.id, 10);
+        const body = await request.json();
+
+        const {id} = body;
+
+        const subId = await parseInt(id, 10);
 
         if (isNaN(subId)) {
             return NextResponse.json({ error: "Invalid subscription ID" }, { status: 400 });
