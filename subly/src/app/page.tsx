@@ -11,6 +11,8 @@ interface Subscription {
     price: number;
     paymentFrequency: number;
     paymentDate: string;
+    notificationDays: number;
+    usageFrequency: string;
     category: {
       name: string;
     };
@@ -112,7 +114,7 @@ export default function QuizDashboard() {
             ) : filteredQuizzes.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filteredQuizzes.map((subscription) => (
-                        <SubscriptionCard key={subscription.id} subscription={subscription} />
+                        <SubscriptionCard key={subscription.id} subscription={subscription} categories={categories} />
                     ))}
                 </div>
             ) : (
