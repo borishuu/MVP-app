@@ -4,24 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import SubscriptionCard from '@/components/SubscriptionCard';
 import CreateSubscriptionForm from '@/components/CreateSubscriptionForm';
-
-interface Subscription {
-    id: number;
-    title: string;
-    price: number;
-    paymentFrequency: number;
-    paymentDate: string;
-    notificationDays: number;
-    usageFrequency: string;
-    category: {
-      name: string;
-    };
-  }
-  
+import type { Subscription, Category } from '@/types';
 
 export default function QuizDashboard() {
     const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
-    const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [showForm, setShowForm] = useState(false);
@@ -57,7 +44,7 @@ export default function QuizDashboard() {
           } finally {
               setLoading(false);
           }
-      };
+        };
 
       fetchSubscriptions();
         fetchCategories();
@@ -66,6 +53,20 @@ export default function QuizDashboard() {
     const filteredQuizzes = subscriptions.filter(subscription =>
         subscription.title.toLowerCase().includes(search.toLowerCase())
     );
+
+    const handleDelete = async (subId: number) => {
+        if (confirm('Êtes-vous sûr de vouloir supprimer cet abonnement ?')) {
+          const res = await fetch(`/api/subscription/${subId}`, {
+            method: 'DELETE',
+          });
+          if (res.ok) {
+            setSubscriptions((prev) => prev.filter((sub) => sub.id !== subId));
+          } else {
+            alert('Échec de la suppression.');
+          }
+        }
+    };
+      
 
     const handleCreateSubscription = async (formData: any) => {
       try {
@@ -88,7 +89,7 @@ export default function QuizDashboard() {
       } catch (error) {
           console.error('Erreur réseau:', error);
       }
-  };
+    };
     return (
         <div className="max-w-full mx-auto bg-white p-6 rounded-lg shadow-md">
             <h1 className="text-2xl font-bold text-center mb-4">Mes abonnements</h1>
@@ -110,16 +111,20 @@ export default function QuizDashboard() {
             </div>
 
             {loading ? (
-                <p className="text-center">Chargement des abonnements...</p>
+            <p className="text-center">Chargement des abonnements...</p>
             ) : filteredQuizzes.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {filteredQuizzes.map((subscription) => (
-                        <SubscriptionCard key={subscription.id} subscription={subscription} categories={categories} />
-                    ))}
+            <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
+                {filteredQuizzes.map((subscription) => (
+                <div key={subscription.id} className="w-full sm:w-[45%]">
+                    <SubscriptionCard subscription={subscription} categories={categories} onDelete={() => handleDelete(subscription.id)} />
                 </div>
+                ))}
+            </div>
             ) : (
-                <p className="text-center">Aucun abonnement trouvé.</p>
+            <p className="text-center">Aucun abonnement trouvé.</p>
             )}
+
+
 
           {showForm && (
             <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
