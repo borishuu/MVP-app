@@ -1,24 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-interface Subscription {
-  id: number;
-  title: string;
-  price: number;
-  paymentFrequency: number;
-  paymentDate: string;
-  notificationDays: number;
-  usageFrequency: string;
-  category: {
-    name: string;
-  };
-}
-
-interface Category {
-  id: number;
-  name: string;
-}
+import type { Subscription, Category } from '@/types';
 
 interface EditSubscriptionFormProps {
   subscription: Subscription;

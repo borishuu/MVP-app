@@ -22,6 +22,7 @@ export async function GET(
 
     const subscription = await prisma.subscription.findUnique({
       where: { id: subId },
+      include: { category: true },
     });
 
     if (!subscription) {
@@ -97,5 +98,42 @@ export async function PUT(
   } catch (error) {
     console.error('Error updating subscription:', error);
     return NextResponse.json({ error: 'Failed to update subscription' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { userId, error } = await verifyAuth(request);
+
+    if (error) {
+      return NextResponse.json({ error }, { status: 401 });
+    }
+
+    const { id } = await params;
+    const subId = parseInt(id, 10);
+
+    if (isNaN(subId)) {
+      return NextResponse.json({ error: 'Invalid subscription ID' }, { status: 400 });
+    }
+
+    const existing = await prisma.subscription.findUnique({
+      where: { id: subId },
+    });
+
+    if (!existing || existing.userId !== userId) {
+      return NextResponse.json({ error: 'Subscription not found or access denied' }, { status: 404 });
+    }
+
+    await prisma.subscription.delete({
+      where: { id: subId },
+    });
+
+    return NextResponse.json({ message: 'Subscription deleted successfully' }, { status: 200 });
+  } catch (error) {
+    console.error('Error deleting subscription:', error);
+    return NextResponse.json({ error: 'Failed to delete subscription' }, { status: 500 });
   }
 }

@@ -3,34 +3,17 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Pencil, Trash2, ExternalLink } from 'lucide-react';
-
-interface Alternative {
-  name: string;
-  minPrice: number;
-  minPriceFrequency: string;
-  url: string;
-}
-
-
-interface Subscription {
-  id: number;
-  title: string;
-  price: number;
-  paymentFrequency: number;
-  paymentDate: string;
-  notificationDays: number;
-  usageFrequency: string;
-  category: {
-    name: string;
-  };
-}
+import type { Subscription, Alternative, Category } from '@/types';
+import EditSubscriptionForm from '@/components/EditSubscriptionForm'; 
 
 export default function SubscriptionPage() {
   const { id } = useParams();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [alternatives, setAlternatives] = useState<Alternative[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingAlternatives, setLoadingAlternatives] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
 
   useEffect(() => {
@@ -66,11 +49,28 @@ export default function SubscriptionPage() {
           setLoadingAlternatives(false);
       }
     };
+
+    const fetchCategories = async () => {
+      try {
+          const response = await fetch('/api/category');
+          if (response.ok) {
+              const data = await response.json();
+              setCategories(data);
+          } else {
+              console.error('Failed to fetch categories');
+          }
+      } catch (error) {
+          console.error('Error fetching categories:', error);
+      } finally {
+          setLoading(false);
+      }
+    };
   
 
     if (id) {
       fetchSubscription();
       fetchAlternatives();
+      fetchCategories();
     }
   }, [id]);
 
@@ -80,18 +80,19 @@ export default function SubscriptionPage() {
   const paymentFreqText = subscription.paymentFrequency === 1 ? 'Mensuel' : `${subscription.paymentFrequency} mois`;
 
   return (
+    <>
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Abonnement - {subscription.title}</h1>
         <div className="space-x-2">
         <div className="flex items-center gap-2">
-          <button className="p-1 hover:text-blue-500">
-            <Pencil size={20} />
-          </button>
-          <button className="p-1 hover:text-red-500">
-            <Trash2 size={20} />
-          </button>
-        </div>
+            <button onClick={() => setIsEditing(true)} className="p-1 hover:text-blue-500">
+              <Pencil size={20} />
+            </button>
+            <button className="p-1 hover:text-red-500">
+              <Trash2 size={20} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -136,6 +137,21 @@ export default function SubscriptionPage() {
         )}
       </div>
 
+
     </div>
+    {isEditing && (
+      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <EditSubscriptionForm
+          subscription={subscription}
+          categories={categories}
+          onClose={() => setIsEditing(false)}
+          onSave={(updatedSub) => {
+            setSubscription(updatedSub); 
+            setIsEditing(false);
+          }}
+        />
+      </div>
+    )}
+    </>
   );
 }

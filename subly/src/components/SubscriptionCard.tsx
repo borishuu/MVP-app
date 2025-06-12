@@ -3,33 +3,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Pencil, Trash2, Eye } from 'lucide-react';
+import type { Subscription, Category } from '@/types';
 import EditSubscriptionForm from '@/components/EditSubscriptionForm'; 
-
-interface Subscription {
-  id: number;
-  title: string;
-  price: number;
-  paymentFrequency: number;
-  paymentDate: string;
-  notificationDays: number;
-  usageFrequency: string;
-  category: {
-    name: string;
-  };
-}
-
-interface Category {
-  id: number;
-  name: string;
-}
 
 interface Props {
   subscription: Subscription;
   categories: Category[];
-  onUpdated?: () => void; 
+  onUpdated?: () => void;
+  onDelete?: () => void;  
 }
 
-export default function SubscriptionCard({ subscription, categories, onUpdated }: Props) {
+export default function SubscriptionCard({ subscription, categories, onUpdated, onDelete }: Props) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [localSubscription, setLocalSubscription] = useState<Subscription>(subscription);
@@ -54,7 +38,7 @@ export default function SubscriptionCard({ subscription, categories, onUpdated }
             <button onClick={() => setIsEditing(true)} className="p-1 hover:text-blue-500">
               <Pencil size={20} />
             </button>
-            <button className="p-1 hover:text-red-500">
+            <button onClick = {onDelete} className="p-1 hover:text-red-500">
               <Trash2 size={20} />
             </button>
           </div>
