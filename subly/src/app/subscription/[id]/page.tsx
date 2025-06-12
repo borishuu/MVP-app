@@ -117,7 +117,6 @@ export default function SubscriptionPage() {
         <p><strong>Prochain paiement :</strong> {new Date(subscription.paymentDate).toLocaleDateString('fr-CH')}</p>
         <p><strong>Réception notification :</strong> {subscription.paymentNotificationTime} jours en avance</p>
         <p><strong>Fréquence d’utilisation :</strong> {subscription.usageFrequency}</p>
-        {/*<p><strong>Catégorie :</strong> {subscription.category.name}</p>*/}
       </div>
 
       <div className="mt-6">
