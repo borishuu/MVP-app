@@ -1,37 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Pencil, Trash2, ExternalLink } from 'lucide-react';
-
-interface Alternative {
-  name: string;
-  minPrice: number;
-  minPriceFrequency: string;
-  url: string;
-}
-
-
-interface Subscription {
-  id: number;
-  title: string;
-  price: number;
-  paymentFrequency: number;
-  paymentDate: string;
-  notificationDays: number;
-  usageFrequency: string;
-  category: {
-    name: string;
-  };
-}
+import type { Subscription, Alternative, Category } from '@/types';
+import EditSubscriptionForm from '@/components/EditSubscriptionForm'; 
 
 export default function SubscriptionPage() {
   const { id } = useParams();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [alternatives, setAlternatives] = useState<Alternative[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingAlternatives, setLoadingAlternatives] = useState(true);
-
+  const [isEditing, setIsEditing] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -66,32 +49,63 @@ export default function SubscriptionPage() {
           setLoadingAlternatives(false);
       }
     };
+
+    const fetchCategories = async () => {
+      try {
+          const response = await fetch('/api/category');
+          if (response.ok) {
+              const data = await response.json();
+              setCategories(data);
+          } else {
+              console.error('Failed to fetch categories');
+          }
+      } catch (error) {
+          console.error('Error fetching categories:', error);
+      } finally {
+          setLoading(false);
+      }
+    };
   
 
     if (id) {
       fetchSubscription();
       fetchAlternatives();
+      fetchCategories();
     }
   }, [id]);
+
+  const handleDelete = async (subId: number) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet abonnement ?')) {
+      const res = await fetch(`/api/subscription/${subId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        router.push('/');
+      } else {
+        alert('Échec de la suppression.');
+      }
+    }
+  };
 
   if (loading) return <p className="text-center">Chargement de l'abonnement...</p>;
   if (!subscription) return <p className="text-center text-red-600">Abonnement non trouvé.</p>;
 
-  const paymentFreqText = subscription.paymentFrequency === 1 ? 'Mensuel' : `${subscription.paymentFrequency} mois`;
+  const paymentFreqText = subscription.paymentFrequency === 1 ? 'Mensuel' : 'Annuel';
 
   return (
+    <>
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-xl space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Abonnement - {subscription.title}</h1>
         <div className="space-x-2">
         <div className="flex items-center gap-2">
-          <button className="p-1 hover:text-blue-500">
-            <Pencil size={20} />
-          </button>
-          <button className="p-1 hover:text-red-500">
-            <Trash2 size={20} />
-          </button>
-        </div>
+            <button onClick={() => setIsEditing(true)} className="p-1 hover:text-blue-500">
+              <Pencil size={20} />
+            </button>
+            <button onClick={() => handleDelete(subscription.id)} className="p-1 hover:text-red-500">
+              <Trash2 size={20} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -100,10 +114,9 @@ export default function SubscriptionPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-12">
-        <p><strong>Prochain paiement :</strong> {subscription.paymentDate}</p>
-        <p><strong>Réception notification :</strong> {subscription.notificationDays} jours en avance</p>
+        <p><strong>Prochain paiement :</strong> {new Date(subscription.paymentDate).toLocaleDateString('fr-CH')}</p>
+        <p><strong>Réception notification :</strong> {subscription.paymentNotificationTime} jours en avance</p>
         <p><strong>Fréquence d’utilisation :</strong> {subscription.usageFrequency}</p>
-        {/*<p><strong>Catégorie :</strong> {subscription.category.name}</p>*/}
       </div>
 
       <div className="mt-6">
@@ -136,6 +149,21 @@ export default function SubscriptionPage() {
         )}
       </div>
 
+
     </div>
+    {isEditing && (
+      <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <EditSubscriptionForm
+          subscription={subscription}
+          categories={categories}
+          onClose={() => setIsEditing(false)}
+          onSave={(updatedSub) => {
+            setSubscription(updatedSub); 
+            setIsEditing(false);
+          }}
+        />
+      </div>
+    )}
+    </>
   );
 }
