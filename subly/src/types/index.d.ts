@@ -12,7 +12,7 @@ export interface Subscription {
     price: number;
     paymentFrequency: number;
     paymentDate: string;
-    notificationDays: number;
+    paymentNotificationTime: number;
     usageFrequency: string;
     category: {
         name: string;

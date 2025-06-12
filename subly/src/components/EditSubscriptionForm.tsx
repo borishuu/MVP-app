@@ -33,11 +33,10 @@ export default function EditSubscriptionForm({
       setFrequency(subscription.paymentFrequency === 1 ? 'monthly' : 'yearly');
       setPaymentDate(subscription.paymentDate.slice(0, 10));
       setNotificationTime(
-        subscription.notificationDays !== undefined
-          ? subscription.notificationDays.toString()
-          : '5' // default fallback value
-      );
-      // Set booleans based on your app logic if stored
+        subscription.paymentNotificationTime !== undefined
+          ? subscription.paymentNotificationTime.toString()
+          : '5'
+      );    
     }
   }, [subscription]);
   

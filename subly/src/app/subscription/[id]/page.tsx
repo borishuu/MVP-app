@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Pencil, Trash2, ExternalLink } from 'lucide-react';
 import type { Subscription, Alternative, Category } from '@/types';
 import EditSubscriptionForm from '@/components/EditSubscriptionForm'; 
@@ -14,7 +14,7 @@ export default function SubscriptionPage() {
   const [loading, setLoading] = useState(true);
   const [loadingAlternatives, setLoadingAlternatives] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-
+  const router = useRouter();
 
   useEffect(() => {
     const fetchSubscription = async () => {
@@ -74,10 +74,23 @@ export default function SubscriptionPage() {
     }
   }, [id]);
 
+  const handleDelete = async (subId: number) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet abonnement ?')) {
+      const res = await fetch(`/api/subscription/${subId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        router.push('/');
+      } else {
+        alert('Échec de la suppression.');
+      }
+    }
+  };
+
   if (loading) return <p className="text-center">Chargement de l'abonnement...</p>;
   if (!subscription) return <p className="text-center text-red-600">Abonnement non trouvé.</p>;
 
-  const paymentFreqText = subscription.paymentFrequency === 1 ? 'Mensuel' : `${subscription.paymentFrequency} mois`;
+  const paymentFreqText = subscription.paymentFrequency === 1 ? 'Mensuel' : 'Annuel';
 
   return (
     <>
@@ -89,7 +102,7 @@ export default function SubscriptionPage() {
             <button onClick={() => setIsEditing(true)} className="p-1 hover:text-blue-500">
               <Pencil size={20} />
             </button>
-            <button className="p-1 hover:text-red-500">
+            <button onClick={() => handleDelete(subscription.id)} className="p-1 hover:text-red-500">
               <Trash2 size={20} />
             </button>
           </div>
@@ -101,8 +114,8 @@ export default function SubscriptionPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-12">
-        <p><strong>Prochain paiement :</strong> {subscription.paymentDate}</p>
-        <p><strong>Réception notification :</strong> {subscription.notificationDays} jours en avance</p>
+        <p><strong>Prochain paiement :</strong> {new Date(subscription.paymentDate).toLocaleDateString('fr-CH')}</p>
+        <p><strong>Réception notification :</strong> {subscription.paymentNotificationTime} jours en avance</p>
         <p><strong>Fréquence d’utilisation :</strong> {subscription.usageFrequency}</p>
         {/*<p><strong>Catégorie :</strong> {subscription.category.name}</p>*/}
       </div>
